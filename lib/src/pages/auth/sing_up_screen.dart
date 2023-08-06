@@ -5,7 +5,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../common_widgets/custom_text_field.dart';
 
 class SingUpScreen extends StatelessWidget {
-  SingUpScreen({super.key});
+   SingUpScreen({super.key});
 
   final cpfFormatter = MaskTextInputFormatter(
     mask: '###.###.###-##',
