@@ -151,8 +151,8 @@ class SignInScreen extends StatelessWidget {
 
                       if (_formKey.currentState!.validate()) {
                         authController.singIn(
-                            email: emailController.toString(),
-                            password: passwordController.toString());
+                            email: emailController.text,
+                            password: passwordController.text);
                         print(authController);
 
                         // Get.offNamed(PageRoutes.baseScreenRoute);

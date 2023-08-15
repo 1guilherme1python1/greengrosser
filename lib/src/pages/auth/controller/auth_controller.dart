@@ -13,7 +13,7 @@ class AuthController extends GetxController {
 
     isLoading.value = true;
 
-    await authRepository.signIn(email: 'guilherme@gmail.com', password: 'gui123456');
+    await authRepository.signIn(email: email, password: password);
 
     isLoading.value = false;
   }
