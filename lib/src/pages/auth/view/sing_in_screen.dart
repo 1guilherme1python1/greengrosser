@@ -1,14 +1,21 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:greengrocer/src/pages/auth/controller/auth_controller.dart';
 import 'package:greengrocer/src/pages/common_widgets/custom_text_field.dart';
 import 'package:greengrocer/src/config/custom_colors.dart';
 import 'package:greengrocer/src/pages_routes/app_pages.dart';
 
-import '../common_widgets/app_name_widget.dart';
+import '../../common_widgets/app_name_widget.dart';
 
 class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+  SignInScreen({super.key});
+
+  final _formKey = GlobalKey<FormState>();
+
+  //controlador de campos de texto
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +40,19 @@ class SignInScreen extends StatelessWidget {
                     color: Colors.white,
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(45))),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _customTextFiedEmail(),
-                    _customTextFieldPassword(),
-                    _buttonEnter(context),
-                    _forgotPassword(),
-                    _dividerFields(),
-                    _createAnAccount(context)
-                  ],
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _customTextFiedEmail(),
+                      _customTextFieldPassword(),
+                      _buttonEnter(context),
+                      _forgotPassword(),
+                      _dividerFields(),
+                      _createAnAccount(context)
+                    ],
+                  ),
                 ),
               )
             ],
@@ -83,18 +93,42 @@ class SignInScreen extends StatelessWidget {
 
   //campo de email
   _customTextFiedEmail() {
-    return const CustomTextField(
+    return CustomTextField(
+      controller: emailController,
       icon: Icons.email,
       label: 'Email',
+      validator: (email) {
+        if (email == null || email.isEmpty) {
+          return 'Digite seu email';
+        }
+
+        if (!email.isEmail) {
+          return 'Digite um email valido';
+        }
+
+        return null;
+      },
     );
   }
 
   //campo de senha
   _customTextFieldPassword() {
-    return const CustomTextField(
+    return CustomTextField(
+      controller: passwordController,
       icon: Icons.lock,
       label: 'Senha',
       isSecret: true,
+      validator: (password) {
+        if (password == null || password.isEmpty) {
+          return 'Digite sua senha';
+        }
+
+        if (password.length < 7) {
+          return 'Digite uma senha com pelo menos 7 caracteres';
+        }
+
+        return null;
+      },
     );
   }
 
@@ -102,18 +136,37 @@ class SignInScreen extends StatelessWidget {
   _buttonEnter(BuildContext context) {
     return SizedBox(
         height: 50,
-        child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            )),
-            onPressed: () {
-              Get.offNamed(PageRoutes.baseScreenRoute);
-            },
-            child: const Text(
-              'Entrar',
-              style: TextStyle(fontSize: 18),
-            )));
+        child: GetX<AuthController>(
+          builder: (authController) {
+            return ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              )),
+              onPressed: authController.isLoading.value
+                  ? null // caso esteja carregando o campo ficara desabilidado
+                  : () {
+
+                    FocusScope.of(context).unfocus(); // desabilita o teclado
+
+                      if (_formKey.currentState!.validate()) {
+                        authController.singIn(
+                            email: emailController.toString(),
+                            password: passwordController.toString());
+                        print(authController);
+
+                        // Get.offNamed(PageRoutes.baseScreenRoute);
+                      }
+                    },
+              child: authController.isLoading.value
+                  ? const CircularProgressIndicator()
+                  : const Text(
+                      'Entrar',
+                      style: TextStyle(fontSize: 18),
+                    ),
+            );
+          },
+        ));
   }
 
   //botao de esqueci senha
